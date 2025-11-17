@@ -1,66 +1,108 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+import { Container, Row, Col, Button, Card } from "react-bootstrap";
+import Link from "next/link";
+import { FaSearch, FaUserTie, FaChartLine } from "react-icons/fa";
+import Layout from "@/components/Layout/Layout";
 
 export default function Home() {
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className={styles.intro}>
-          <h1>To get started, edit the page.js file.</h1>
-          <p>
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className={styles.secondary}
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+    <Layout>
+      {/* Hero Section */}
+      <section className="bg-primary text-white py-5">
+        <Container>
+          <Row className="align-items-center">
+            <Col lg={6}>
+              <h1 className="display-4 fw-bold mb-4">
+                Smart Job Matching for Nigerian Graduates
+              </h1>
+              <p className="lead mb-4">
+                AI-powered platform connecting talented graduates with the right
+                career opportunities. Better matches, faster hiring.
+              </p>
+              <div className="d-flex gap-3">
+                <Button as={Link} href="/register" variant="light" size="lg">
+                  Get Started
+                </Button>
+                <Button
+                  as={Link}
+                  href="/jobs"
+                  variant="outline-light"
+                  size="lg"
+                >
+                  Browse Jobs
+                </Button>
+              </div>
+            </Col>
+            <Col lg={6}>
+              <div className="text-center">
+                <img
+                  src="/hero-image.svg"
+                  alt="Job Matching"
+                  className="img-fluid"
+                  style={{ maxHeight: "400px" }}
+                />
+              </div>
+            </Col>
+          </Row>
+        </Container>
+      </section>
+
+      {/* Features Section */}
+      <section className="py-5">
+        <Container>
+          <Row className="text-center mb-5">
+            <Col>
+              <h2 className="fw-bold">How It Works</h2>
+              <p className="text-muted">
+                Smart matching powered by AI technology
+              </p>
+            </Col>
+          </Row>
+          <Row>
+            <Col md={4} className="mb-4">
+              <Card className="h-100 text-center border-0 shadow-sm">
+                <Card.Body className="p-4">
+                  <div className="text-primary mb-3">
+                    <FaSearch size={48} />
+                  </div>
+                  <Card.Title>AI-Powered Matching</Card.Title>
+                  <Card.Text>
+                    Our intelligent algorithm analyzes your skills and
+                    experience to find the perfect job matches.
+                  </Card.Text>
+                </Card.Body>
+              </Card>
+            </Col>
+            <Col md={4} className="mb-4">
+              <Card className="h-100 text-center border-0 shadow-sm">
+                <Card.Body className="p-4">
+                  <div className="text-primary mb-3">
+                    <FaUserTie size={48} />
+                  </div>
+                  <Card.Title>For Graduates</Card.Title>
+                  <Card.Text>
+                    Upload your CV and let our platform find relevant job
+                    opportunities tailored to your profile.
+                  </Card.Text>
+                </Card.Body>
+              </Card>
+            </Col>
+            <Col md={4} className="mb-4">
+              <Card className="h-100 text-center border-0 shadow-sm">
+                <Card.Body className="p-4">
+                  <div className="text-primary mb-3">
+                    <FaChartLine size={48} />
+                  </div>
+                  <Card.Title>For Employers</Card.Title>
+                  <Card.Text>
+                    Find qualified candidates quickly with our smart matching
+                    system and reduce hiring time.
+                  </Card.Text>
+                </Card.Body>
+              </Card>
+            </Col>
+          </Row>
+        </Container>
+      </section>
+    </Layout>
   );
 }
