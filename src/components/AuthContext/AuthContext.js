@@ -1,6 +1,6 @@
-// context/AuthContext.js
+"use client";
+import { useRouter } from "next/navigation";
 import { createContext, useState, useContext, useEffect } from "react";
-import { useRouter } from "next/router";
 
 const AuthContext = createContext();
 
@@ -27,11 +27,15 @@ export function AuthProvider({ children }) {
           const userData = await response.json();
           setUser(userData);
         } else {
+          // Token is invalid or expired
           localStorage.removeItem("token");
+          setUser(null);
         }
       }
     } catch (error) {
       console.error("Auth check failed:", error);
+      localStorage.removeItem("token");
+      setUser(null);
     } finally {
       setLoading(false);
     }
@@ -52,22 +56,23 @@ export function AuthProvider({ children }) {
         localStorage.setItem("token", token);
         setUser(user);
 
-        // Redirect based on user type
-        if (user.userType === "student") {
-          router.push("/student/dashboard");
-        } else if (user.userType === "employer") {
-          router.push("/employer/dashboard");
-        } else if (user.userType === "admin") {
-          router.push("/admin/dashboard");
+        // Redirect based on user type - fixed path structure
+        if (user.userType === "STUDENT") {
+          router.push("/main/student/dashboard");
+        } else if (user.userType === "EMPLOYER") {
+          router.push("/main/employer/dashboard");
+        } else if (user.userType === "ADMIN") {
+          router.push("/main/admin/dashboard");
         }
 
         return { success: true };
       } else {
-        const error = await response.json();
-        return { success: false, error: error.message };
+        const errorData = await response.json();
+        return { success: false, error: errorData.message };
       }
     } catch (error) {
-      return { success: false, error: "Login failed" };
+      console.error("Login error:", error);
+      return { success: false, error: "Login failed. Please try again." };
     }
   };
 
@@ -77,8 +82,10 @@ export function AuthProvider({ children }) {
     router.push("/");
   };
 
+  // Add setUser to the context value so it can be used in components
   const value = {
     user,
+    setUser, // Added this line
     login,
     logout,
     loading,
@@ -88,5 +95,9 @@ export function AuthProvider({ children }) {
 }
 
 export function useAuth() {
-  return useContext(AuthContext);
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+  return context;
 }

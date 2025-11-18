@@ -1,0 +1,143 @@
+// prisma/schema.prisma
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+model User {
+    id           Int      @id @default(autoincrement())
+    email        String   @unique
+    passwordHash String
+    userType     UserType @default(STUDENT)
+    fullName     String?
+    phone        String?
+    bio          String?
+    location     String?
+    createdAt    DateTime @default(now())
+    updatedAt    DateTime @updatedAt
+
+    // Relations
+    studentProfile  StudentProfile?
+    employerProfile EmployerProfile?
+    jobsPosted      Job[]
+    applications    Application[]
+    subscriptions   Subscription[]
+
+    @@map("users")
+}
+
+model StudentProfile {
+    id               Int      @id @default(autoincrement())
+    userId           Int      @unique
+    institution      String?
+    degree           String?
+    fieldOfStudy     String?
+    graduationYear   Int?
+    skills           String[]
+    resumeUrl        String?
+    experience       String?
+    cvText           String?
+    parsedSkills     String[]
+    parsedEducation  String?
+    parsedExperience String?
+    createdAt        DateTime @default(now())
+    updatedAt        DateTime @updatedAt
+
+    // Relations
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@map("student_profiles")
+}
+
+model EmployerProfile {
+    id          Int      @id @default(autoincrement())
+    userId      Int      @unique
+    companyName String?
+    industry    String?
+    companySize String?
+    website     String?
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
+    // Relations
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@map("employer_profiles")
+}
+
+model Job {
+    id           Int      @id @default(autoincrement())
+    title        String
+    description  String
+    requirements Json
+    location     String?
+    jobType      JobType  @default(FULL_TIME)
+    salaryRange  String?
+    isActive     Boolean  @default(true)
+    isApproved   Boolean  @default(false)
+    isPromoted   Boolean  @default(false)
+    createdAt    DateTime @default(now())
+    updatedAt    DateTime @updatedAt
+
+    // Relations
+    employerId   Int
+    employer     User          @relation(fields: [employerId], references: [id])
+    applications Application[]
+
+    @@map("jobs")
+}
+
+model Application {
+    id         Int       @id @default(autoincrement())
+    status     AppStatus @default(PENDING)
+    matchScore Int?
+    appliedAt  DateTime  @default(now())
+
+    // Relations
+    jobId     Int
+    job       Job  @relation(fields: [jobId], references: [id])
+    studentId Int
+    student   User @relation(fields: [studentId], references: [id])
+
+    @@unique([jobId, studentId])
+    @@map("applications")
+}
+
+model Subscription {
+    id        Int       @id @default(autoincrement())
+    planType  String
+    isActive  Boolean   @default(true)
+    createdAt DateTime  @default(now())
+    expiresAt DateTime?
+
+    // Relations
+    employerId Int
+    employer   User @relation(fields: [employerId], references: [id])
+
+    @@map("subscriptions")
+}
+
+enum UserType {
+    STUDENT
+    EMPLOYER
+    ADMIN
+}
+
+enum JobType {
+    FULL_TIME
+    PART_TIME
+    CONTRACT
+    REMOTE
+    INTERNSHIP
+}
+
+enum AppStatus {
+    PENDING
+    REVIEWED
+    ACCEPTED
+    REJECTED
+}

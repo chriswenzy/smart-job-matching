@@ -7,13 +7,26 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "db:init": "dotenv -e .env.local -- node src/lib/db.js"
-
+    "db:push": "prisma db push",
+    "db:migrate": "prisma migrate dev",
+    "db:migrate:deploy": "prisma migrate deploy",
+    "db:reset": "prisma migrate reset",
+    "db:seed": "prisma db seed",
+    "db:studio": "prisma studio",
+    "db:generate": " prisma generate"
   },
   "dependencies": {
+    "@prisma/client": "^6.19.0",
+    "bcryptjs": "^3.0.3",
     "bootstrap": "^5.3.8",
     "formik": "^2.4.9",
+    "jsonwebtoken": "^9.0.2",
+    "mammoth": "^1.11.0",
+    "multer": "^2.0.2",
+    "natural": "^8.1.0",
     "next": "16.0.3",
+    "pdf-parse": "^2.4.5",
+    "pg": "^8.16.3",
     "react": "19.2.0",
     "react-bootstrap": "^2.10.10",
     "react-dom": "19.2.0",
@@ -22,6 +35,12 @@
   },
   "devDependencies": {
     "eslint": "^9",
-    "eslint-config-next": "16.0.3"
-  }
+    "eslint-config-next": "16.0.3",
+    "prisma": "^6.19.0"
+  },
+  
+    "prisma": {
+      "seed": "node prisma/seed.js"
+    }
+  
 }

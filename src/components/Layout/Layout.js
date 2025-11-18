@@ -1,15 +1,15 @@
-// components/Layout.js
+"use client";
 import { Navbar, Nav, Container } from "react-bootstrap";
 import Link from "next/link";
-import { useRouter } from "next/router";
 import { useAuth } from "../AuthContext/AuthContext";
+import { useRouter } from "next/navigation";
 
 export default function Layout({ children }) {
-  const { user, logout } = useAuth();
+  // const { user, logout } = useAuth();
   const router = useRouter();
-
+  const user = "";
   const handleLogout = () => {
-    logout();
+    // logout();
     router.push("/");
   };
 
