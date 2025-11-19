@@ -1,6 +1,5 @@
-// utils/matchingAlgorithm.js
+import { prisma } from "@/lib/prisma/prisma";
 import natural from "natural";
-import { prisma } from "../lib/prisma";
 
 const { TfIdf } = natural;
 

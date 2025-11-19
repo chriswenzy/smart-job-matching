@@ -1,6 +1,7 @@
-// app/api/admin/applications/route.js
+// app/api/student/jobs/recommended/route.js
 import { verifyToken } from "@/lib/auth/auth";
 import { prisma } from "@/lib/prisma/prisma";
+import { calculateStudentJobMatches } from "@/utils/matchingAlgorithm";
 
 export async function GET(req) {
   try {
@@ -10,35 +11,15 @@ export async function GET(req) {
     }
 
     const decoded = verifyToken(token);
-    if (!decoded || decoded.userType !== "ADMIN") {
+    if (!decoded || decoded.userType !== "STUDENT") {
       return Response.json({ message: "Access denied" }, { status: 403 });
     }
 
-    const applications = await prisma.application.findMany({
-      include: {
-        job: {
-          include: {
-            // employer: {
-            //   select: {
-            //     companyName: true,
-            //   },
-            // },
-          },
-        },
-        student: {
-          include: {
-            studentProfile: true,
-          },
-        },
-      },
-      orderBy: {
-        appliedAt: "desc",
-      },
-    });
+    const matches = await calculateStudentJobMatches(decoded.userId);
 
-    return Response.json(applications);
+    return Response.json(matches);
   } catch (error) {
-    console.error("Error fetching applications:", error);
+    console.error("Error fetching recommended jobs:", error);
     return Response.json({ message: "Internal server error" }, { status: 500 });
   }
 }

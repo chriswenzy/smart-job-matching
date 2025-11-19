@@ -85,7 +85,7 @@ export function AuthProvider({ children }) {
   // Add setUser to the context value so it can be used in components
   const value = {
     user,
-    setUser, // Added this line
+    setUser,
     login,
     logout,
     loading,

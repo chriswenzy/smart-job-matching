@@ -21,11 +21,11 @@ export async function GET(req) {
       include: {
         job: {
           include: {
-            employer: {
-              select: {
-                companyName: true,
-              },
-            },
+            // employer: {
+            //   select: {
+            //     companyName: true,
+            //   },
+            // },
           },
         },
       },

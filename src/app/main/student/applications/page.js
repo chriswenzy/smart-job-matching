@@ -1,4 +1,5 @@
-// pages/student/applications.js
+"use client";
+
 import { useState, useEffect } from "react";
 import {
   Container,
@@ -10,9 +11,9 @@ import {
   Button,
   Form,
 } from "react-bootstrap";
-import Layout from "../../components/Layout";
-import { useAuth } from "../../context/AuthContext";
 import { FaSearch, FaEye, FaFileDownload } from "react-icons/fa";
+import PrivateLayout from "@/components/Layout/PrivateLayout";
+import { useAuth } from "@/components/AuthContext/AuthContext";
 
 export default function StudentApplications() {
   const { user } = useAuth();
@@ -107,7 +108,7 @@ export default function StudentApplications() {
 
   if (loading) {
     return (
-      <Layout>
+      <PrivateLayout>
         <Container className="py-4">
           <div className="text-center">
             <div className="spinner-border" role="status">
@@ -115,12 +116,12 @@ export default function StudentApplications() {
             </div>
           </div>
         </Container>
-      </Layout>
+      </PrivateLayout>
     );
   }
 
   return (
-    <Layout>
+    <PrivateLayout>
       <Container className="py-4">
         <Row className="mb-4">
           <Col>
@@ -300,6 +301,6 @@ export default function StudentApplications() {
           </Row>
         )}
       </Container>
-    </Layout>
+    </PrivateLayout>
   );
 }

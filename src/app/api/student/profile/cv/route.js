@@ -1,88 +1,160 @@
-// pages/api/student/profile/cv.js
-import { verifyToken } from "../../../../lib/auth";
-import { prisma } from "../../../../lib/prisma";
-import { parseCV } from "../../../../utils/cvParser";
+// app/api/student/profile/cv/route.js
+import { verifyToken } from "@/lib/auth/auth";
+import { prisma } from "@/lib/prisma/prisma";
+import { parseCV } from "@/utils/cvParser";
 
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
-
-export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ message: "Method not allowed" });
-  }
-
+export async function POST(req) {
   try {
-    const token = req.headers.authorization?.replace("Bearer ", "");
+    const token = req.headers.get("authorization")?.replace("Bearer ", "");
     if (!token) {
-      return res.status(401).json({ message: "No token provided" });
+      return Response.json({ message: "No token provided" }, { status: 401 });
     }
 
     const decoded = verifyToken(token);
     if (!decoded || decoded.userType !== "STUDENT") {
-      return res.status(403).json({ message: "Access denied" });
+      return Response.json({ message: "Access denied" }, { status: 403 });
     }
 
-    // For file uploads, you would typically use a library like multer
-    // This is a simplified version
-    const formData = await new Promise((resolve, reject) => {
-      let body = "";
-      req.on("data", (chunk) => {
-        body += chunk.toString();
-      });
-      req.on("end", () => {
-        resolve(body);
-      });
-      req.on("error", reject);
-    });
+    // Handle form data with file upload
+    const formData = await req.formData();
+    const cvFile = formData.get("cvFile");
+    const cvText = formData.get("cvText");
 
-    // In a real implementation, you would handle file upload properly
-    // For now, we'll assume the CV text is sent in the request
-    const { cvText } = JSON.parse(formData);
+    let parsedData;
 
-    if (!cvText) {
-      return res.status(400).json({ message: "CV text is required" });
+    if (cvFile && cvFile instanceof File) {
+      // Handle file upload
+      const buffer = Buffer.from(await cvFile.arrayBuffer());
+      const fileType = cvFile.type;
+      parsedData = await parseCV(buffer, fileType);
+    } else if (cvText) {
+      // Handle text input
+      parsedData = await parseCV(Buffer.from(cvText), "text/plain");
+    } else {
+      return Response.json(
+        { message: "Either CV file or CV text is required" },
+        { status: 400 }
+      );
     }
-
-    // Parse CV and extract information
-    const cvData = await parseCV(Buffer.from(cvText), "text/plain");
 
     // Update student profile with parsed CV data
-    await prisma.studentProfile.upsert({
+    const updatedProfile = await prisma.studentProfile.upsert({
       where: { userId: decoded.userId },
       update: {
-        cvText: cvData.text,
-        parsedSkills: cvData.skills,
-        parsedEducation: cvData.education.join(", "),
-        parsedExperience: cvData.experience,
-        skills: cvData.skills,
-        institution: cvData.institution,
-        degree: cvData.degree,
-        fieldOfStudy: cvData.fieldOfStudy,
-        experience: cvData.experienceText,
+        cvText: parsedData.text,
+        parsedSkills: parsedData.skills,
+        parsedEducation: parsedData.education?.join(", ") || "",
+        parsedExperience: parsedData.experience,
+        skills: parsedData.skills,
+        institution: parsedData.institution,
+        degree: parsedData.degree,
+        fieldOfStudy: parsedData.fieldOfStudy,
+        experience: parsedData.experienceText,
+        cvUploadedAt: new Date(),
       },
       create: {
         userId: decoded.userId,
-        cvText: cvData.text,
-        parsedSkills: cvData.skills,
-        parsedEducation: cvData.education.join(", "),
-        parsedExperience: cvData.experience,
-        skills: cvData.skills,
-        institution: cvData.institution,
-        degree: cvData.degree,
-        fieldOfStudy: cvData.fieldOfStudy,
-        experience: cvData.experienceText,
+        cvText: parsedData.text,
+        parsedSkills: parsedData.skills,
+        parsedEducation: parsedData.education?.join(", ") || "",
+        parsedExperience: parsedData.experience,
+        skills: parsedData.skills,
+        institution: parsedData.institution,
+        degree: parsedData.degree,
+        fieldOfStudy: parsedData.fieldOfStudy,
+        experience: parsedData.experienceText,
+        cvUploadedAt: new Date(),
       },
     });
 
-    res.status(200).json({
+    return Response.json({
       message: "CV uploaded and processed successfully",
-      skills: cvData.skills,
+      skills: parsedData.skills,
+      education: parsedData.education,
+      profile: updatedProfile,
     });
   } catch (error) {
     console.error("Error uploading CV:", error);
-    res.status(500).json({ message: "Failed to process CV" });
+
+    if (error.message.includes("Failed to parse CV")) {
+      return Response.json(
+        { message: "Failed to process CV. Please ensure it's a valid format." },
+        { status: 400 }
+      );
+    }
+
+    return Response.json({ message: "Failed to process CV" }, { status: 500 });
+  }
+}
+
+// Optional: GET method to retrieve CV data
+export async function GET(req) {
+  try {
+    const token = req.headers.get("authorization")?.replace("Bearer ", "");
+    if (!token) {
+      return Response.json({ message: "No token provided" }, { status: 401 });
+    }
+
+    const decoded = verifyToken(token);
+    if (!decoded || decoded.userType !== "STUDENT") {
+      return Response.json({ message: "Access denied" }, { status: 403 });
+    }
+
+    const profile = await prisma.studentProfile.findUnique({
+      where: { userId: decoded.userId },
+      select: {
+        cvText: true,
+        skills: true,
+        institution: true,
+        degree: true,
+        fieldOfStudy: true,
+        experience: true,
+        cvUploadedAt: true,
+      },
+    });
+
+    if (!profile || !profile.cvText) {
+      return Response.json({ message: "No CV found" }, { status: 404 });
+    }
+
+    return Response.json({
+      cvData: profile,
+    });
+  } catch (error) {
+    console.error("Error fetching CV:", error);
+    return Response.json({ message: "Internal server error" }, { status: 500 });
+  }
+}
+
+// Optional: DELETE method to remove CV
+export async function DELETE(req) {
+  try {
+    const token = req.headers.get("authorization")?.replace("Bearer ", "");
+    if (!token) {
+      return Response.json({ message: "No token provided" }, { status: 401 });
+    }
+
+    const decoded = verifyToken(token);
+    if (!decoded || decoded.userType !== "STUDENT") {
+      return Response.json({ message: "Access denied" }, { status: 403 });
+    }
+
+    await prisma.studentProfile.update({
+      where: { userId: decoded.userId },
+      data: {
+        cvText: null,
+        parsedSkills: [],
+        parsedEducation: null,
+        parsedExperience: null,
+        cvUploadedAt: null,
+      },
+    });
+
+    return Response.json({
+      message: "CV removed successfully",
+    });
+  } catch (error) {
+    console.error("Error deleting CV:", error);
+    return Response.json({ message: "Internal server error" }, { status: 500 });
   }
 }

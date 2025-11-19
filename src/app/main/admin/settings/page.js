@@ -1,4 +1,6 @@
-// pages/admin/settings.js
+"use client";
+
+import AdminLayout from "@/components/Layout/AdminLayout";
 import { useState } from "react";
 import {
   Container,
@@ -11,8 +13,8 @@ import {
   Tab,
   Tabs,
 } from "react-bootstrap";
-import AdminLayout from "../../../components/AdminLayout";
-import { FaSave, FaCog, FaShield, FaBell, FaPalette } from "react-icons/fa";
+import { FaBell, FaCog, FaPalette, FaSave } from "react-icons/fa";
+import { FaShield } from "react-icons/fa6";
 
 export default function AdminSettings() {
   const [settings, setSettings] = useState({

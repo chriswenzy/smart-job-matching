@@ -1,6 +1,6 @@
 // utils/cvParser.js
-import pdfParse from "pdf-parse";
-import mammoth from "mammoth";
+import * as pdfParse from "pdf-parse";
+import * as mammoth from "mammoth";
 import natural from "natural";
 
 const { WordTokenizer } = natural;
@@ -76,133 +76,196 @@ const NIGERIAN_INSTITUTIONS = [
   "college of education",
 ];
 
+// export async function parseCV(fileBuffer, fileType) {
+//   try {
+//     let text = "";
+
+//     // Read file based on type
+//     if (fileType === "application/pdf") {
+//       const data = await pdfParse.default(fileBuffer);
+//       text = data.text;
+//     } else if (fileType.includes("word") || fileType.includes("document")) {
+//       const result = await mammoth.extractRawText({ buffer: fileBuffer });
+//       text = result.value;
+//     } else if (fileType === "text/plain") {
+//       text = fileBuffer.toString("utf8");
+//     }
+
+//     // If no text was extracted, return empty data
+//     if (!text || text.trim().length === 0) {
+//       return {
+//         text: "No text extracted from CV",
+//         skills: [],
+//         education: [],
+//         experience: "0 years",
+//         institution: "Not specified",
+//         degree: "Not specified",
+//         fieldOfStudy: "Not specified",
+//         experienceText: "No experience information found",
+//       };
+//     }
+
+//     // Extract information from CV text
+//     const skills = extractSkills(text);
+//     const education = extractEducation(text);
+//     const experience = extractExperience(text);
+//     const institution = extractInstitution(text);
+//     const degree = extractDegree(text);
+
+//     return {
+//       text: text.substring(0, 2000), // Limit text length
+//       skills,
+//       education,
+//       experience,
+//       institution,
+//       degree,
+//       fieldOfStudy: extractFieldOfStudy(text),
+//       experienceText: extractExperienceText(text),
+//     };
+//   } catch (error) {
+//     console.error("CV parsing error:", error);
+//     throw new Error("Failed to parse CV: " + error.message);
+//   }
+// }
+
+// Alternative approach with dynamic imports
 export async function parseCV(fileBuffer, fileType) {
   try {
     let text = "";
 
-    // Read file based on type
     if (fileType === "application/pdf") {
-      const data = await pdfParse(fileBuffer);
+      // Dynamically import pdf-parse
+      const pdfParse = await import("pdf-parse");
+      const data = await pdfParse.default(fileBuffer);
       text = data.text;
     } else if (fileType.includes("word") || fileType.includes("document")) {
+      // Dynamically import mammoth
+      const mammoth = await import("mammoth");
       const result = await mammoth.extractRawText({ buffer: fileBuffer });
       text = result.value;
+    } else if (fileType === "text/plain") {
+      text = fileBuffer.toString("utf8");
     }
 
-    // Extract information from CV text
-    const skills = extractSkills(text);
-    const education = extractEducation(text);
-    const experience = extractExperience(text);
-    const institution = extractInstitution(text);
-    const degree = extractDegree(text);
-
-    return {
-      text,
-      skills,
-      education,
-      experience,
-      institution,
-      degree,
-      fieldOfStudy: extractFieldOfStudy(text),
-      experienceText: extractExperienceText(text),
-    };
+    // ... rest of the parsing logic
   } catch (error) {
     console.error("CV parsing error:", error);
-    throw new Error("Failed to parse CV");
+    throw new Error("Failed to parse CV: " + error.message);
   }
 }
-
 function extractSkills(text) {
-  const foundSkills = [];
+  const foundSkills = new Set();
 
+  // Direct skill matching
   COMMON_SKILLS.forEach((skill) => {
-    if (text.toLowerCase().includes(skill)) {
-      foundSkills.push(skill);
+    const regex = new RegExp(`\\b${skill}\\b`, "i");
+    if (regex.test(text)) {
+      foundSkills.add(skill);
     }
   });
 
-  // Also look for skills mentioned in context
+  // Look for skills section
   const skillIndicators = [
     "skills",
     "technologies",
     "proficient in",
     "experience with",
+    "technical skills",
+    "programming languages",
   ];
+
   skillIndicators.forEach((indicator) => {
     const index = text.toLowerCase().indexOf(indicator);
     if (index !== -1) {
-      const skillSection = text.substring(index, index + 500).toLowerCase();
+      const skillSection = text
+        .substring(index, Math.min(index + 1000, text.length))
+        .toLowerCase();
       COMMON_SKILLS.forEach((skill) => {
-        if (skillSection.includes(skill) && !foundSkills.includes(skill)) {
-          foundSkills.push(skill);
+        const regex = new RegExp(`\\b${skill}\\b`, "i");
+        if (regex.test(skillSection)) {
+          foundSkills.add(skill);
         }
       });
     }
   });
 
-  return [...new Set(foundSkills)]; // Remove duplicates
+  return Array.from(foundSkills);
 }
 
 function extractEducation(text) {
-  const education = [];
+  const education = new Set();
   const educationIndicators = [
-    "b.sc",
-    "b.eng",
-    "b.tech",
-    "b.a",
-    "b.ed",
-    "bachelors",
-    "m.sc",
-    "m.eng",
-    "m.tech",
-    "m.a",
-    "masters",
-    "phd",
-    "ond",
-    "hnd",
-    "ssc",
-    "waec",
-    "neco",
+    { pattern: /b\.?sc\.?/i, name: "B.Sc" },
+    { pattern: /b\.?eng\.?/i, name: "B.Eng" },
+    { pattern: /b\.?tech\.?/i, name: "B.Tech" },
+    { pattern: /b\.?a\.?/i, name: "B.A" },
+    { pattern: /b\.?ed\.?/i, name: "B.Ed" },
+    { pattern: /bachelors?/i, name: "Bachelor's" },
+    { pattern: /m\.?sc\.?/i, name: "M.Sc" },
+    { pattern: /m\.?eng\.?/i, name: "M.Eng" },
+    { pattern: /m\.?tech\.?/i, name: "M.Tech" },
+    { pattern: /m\.?a\.?/i, name: "M.A" },
+    { pattern: /masters?/i, name: "Master's" },
+    { pattern: /ph\.?d/i, name: "PhD" },
+    { pattern: /doctorate/i, name: "Doctorate" },
+    { pattern: /hnd/i, name: "HND" },
+    { pattern: /ond/i, name: "OND" },
+    { pattern: /ssc/i, name: "SSC" },
+    { pattern: /waec/i, name: "WAEC" },
+    { pattern: /neco/i, name: "NECO" },
   ];
 
-  educationIndicators.forEach((indicator) => {
-    if (text.toLowerCase().includes(indicator)) {
-      education.push(indicator.toUpperCase());
+  educationIndicators.forEach(({ pattern, name }) => {
+    if (pattern.test(text)) {
+      education.add(name);
     }
   });
 
-  return education;
+  return Array.from(education);
 }
 
 function extractInstitution(text) {
+  const lowerText = text.toLowerCase();
   for (const institution of NIGERIAN_INSTITUTIONS) {
-    if (text.toLowerCase().includes(institution)) {
-      return institution;
+    if (lowerText.includes(institution)) {
+      // Capitalize each word
+      return institution
+        .split(" ")
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ");
     }
   }
+
+  // Try to find any university mention
+  const universityMatch = text.match(
+    /(university|polytechnic|college|institute)/i
+  );
+  if (universityMatch) {
+    return "University (Not specified)";
+  }
+
   return "Not specified";
 }
 
 function extractDegree(text) {
   const degreePatterns = [
-    /b\.?sc\.?/i,
-    /b\.?eng\.?/i,
-    /b\.?tech\.?/i,
-    /b\.?a\.?/i,
-    /m\.?sc\.?/i,
-    /m\.?eng\.?/i,
-    /m\.?tech\.?/i,
-    /m\.?a\.?/i,
-    /phd/i,
-    /doctorate/i,
-    /hnd/i,
-    /ond/i,
+    { pattern: /b\.?sc\.?/i, name: "B.Sc" },
+    { pattern: /b\.?eng\.?/i, name: "B.Eng" },
+    { pattern: /b\.?tech\.?/i, name: "B.Tech" },
+    { pattern: /b\.?a\.?/i, name: "B.A" },
+    { pattern: /m\.?sc\.?/i, name: "M.Sc" },
+    { pattern: /m\.?eng\.?/i, name: "M.Eng" },
+    { pattern: /m\.?tech\.?/i, name: "M.Tech" },
+    { pattern: /m\.?a\.?/i, name: "M.A" },
+    { pattern: /ph\.?d/i, name: "PhD" },
+    { pattern: /doctorate/i, name: "Doctorate" },
+    { pattern: /hnd/i, name: "HND" },
+    { pattern: /ond/i, name: "OND" },
   ];
 
-  for (const pattern of degreePatterns) {
-    const match = text.match(pattern);
-    if (match) {
-      return match[0].toUpperCase();
+  for (const { pattern, name } of degreePatterns) {
+    if (pattern.test(text)) {
+      return name;
     }
   }
 
@@ -226,11 +289,20 @@ function extractFieldOfStudy(text) {
     "physics",
     "chemistry",
     "biology",
+    "medicine",
+    "law",
+    "political science",
+    "sociology",
+    "psychology",
   ];
 
+  const lowerText = text.toLowerCase();
   for (const field of fields) {
-    if (text.toLowerCase().includes(field)) {
-      return field;
+    if (lowerText.includes(field)) {
+      return field
+        .split(" ")
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ");
     }
   }
 
@@ -239,15 +311,33 @@ function extractFieldOfStudy(text) {
 
 function extractExperience(text) {
   const experiencePatterns = [
-    /(\d+)\s* years?/i,
+    /(\d+)\s*years?/i,
     /experience.*?(\d+)/i,
     /(\d+)\+?\s*years?/i,
+    /(\d+)\s*yr/i,
   ];
 
   for (const pattern of experiencePatterns) {
     const match = text.match(pattern);
-    if (match) {
-      return match[1] + " years";
+    if (match && parseInt(match[1]) > 0) {
+      const years = parseInt(match[1]);
+      return years === 1 ? "1 year" : `${years} years`;
+    }
+  }
+
+  // Check for internship/fresh graduate indicators
+  const freshGraduateIndicators = [
+    /fresh graduate/i,
+    /recent graduate/i,
+    /entry level/i,
+    /internship/i,
+    /nysc/i,
+    /corp member/i,
+  ];
+
+  for (const indicator of freshGraduateIndicators) {
+    if (indicator.test(text)) {
+      return "0 years";
     }
   }
 
@@ -255,14 +345,23 @@ function extractExperience(text) {
 }
 
 function extractExperienceText(text) {
-  const experienceIndicators = ["experience", "work history", "employment"];
+  const experienceIndicators = [
+    "experience",
+    "work history",
+    "employment history",
+    "professional experience",
+    "work experience",
+  ];
 
   for (const indicator of experienceIndicators) {
     const index = text.toLowerCase().indexOf(indicator);
     if (index !== -1) {
-      return text.substring(index, Math.min(index + 1000, text.length));
+      const start = Math.max(0, index - 200); // Include some context before
+      const end = Math.min(index + 800, text.length); // Limit length
+      return text.substring(start, end).trim();
     }
   }
 
-  return text.substring(0, Math.min(500, text.length));
+  // If no experience section found, return first part of text
+  return text.substring(0, Math.min(500, text.length)).trim();
 }

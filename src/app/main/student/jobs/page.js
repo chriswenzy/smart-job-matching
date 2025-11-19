@@ -1,3 +1,4 @@
+"use client";
 import { useState, useEffect } from "react";
 import {
   Container,
@@ -9,14 +10,14 @@ import {
   Form,
   Pagination,
 } from "react-bootstrap";
-import Layout from "../../components/Layout";
-import { useAuth } from "../../context/AuthContext";
 import {
   FaSearch,
   FaMapMarkerAlt,
   FaBriefcase,
   FaFilter,
 } from "react-icons/fa";
+import PrivateLayout from "@/components/Layout/PrivateLayout";
+import { useAuth } from "@/components/AuthContext/AuthContext";
 
 export default function StudentJobs() {
   const { user } = useAuth();
@@ -79,7 +80,7 @@ export default function StudentJobs() {
   };
 
   // Filter jobs
-  const filteredJobs = jobs.filter((job) => {
+  const filteredJobs = jobs?.filter((job) => {
     const matchesSearch =
       job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       job.employer.companyName.toLowerCase().includes(searchTerm.toLowerCase());
@@ -114,7 +115,7 @@ export default function StudentJobs() {
   };
 
   return (
-    <Layout>
+    <PrivateLayout>
       <Container className="py-4">
         <Row className="mb-4">
           <Col>
@@ -291,6 +292,6 @@ export default function StudentJobs() {
           </div>
         )}
       </Container>
-    </Layout>
+    </PrivateLayout>
   );
 }

@@ -1,4 +1,5 @@
-// pages/student/profile.js
+"use client";
+
 import { useState, useEffect } from "react";
 import {
   Container,
@@ -13,8 +14,7 @@ import {
   Tabs,
 } from "react-bootstrap";
 import { Formik } from "formik";
-import Layout from "../../components/Layout";
-import { useAuth } from "../../context/AuthContext";
+
 import {
   FaSave,
   FaUpload,
@@ -23,6 +23,8 @@ import {
   FaGraduationCap,
   FaBriefcase,
 } from "react-icons/fa";
+import { useAuth } from "@/components/AuthContext/AuthContext";
+import PrivateLayout from "@/components/Layout/PrivateLayout";
 
 export default function StudentProfile() {
   const { user } = useAuth();
@@ -122,7 +124,7 @@ export default function StudentProfile() {
 
   if (!profile) {
     return (
-      <Layout>
+      <PrivateLayout>
         <Container className="py-4">
           <div className="text-center">
             <div className="spinner-border" role="status">
@@ -130,12 +132,12 @@ export default function StudentProfile() {
             </div>
           </div>
         </Container>
-      </Layout>
+      </PrivateLayout>
     );
   }
 
   return (
-    <Layout>
+    <PrivateLayout>
       <Container className="py-4">
         <Row className="mb-4">
           <Col>
@@ -546,6 +548,6 @@ export default function StudentProfile() {
           </Tab>
         </Tabs>
       </Container>
-    </Layout>
+    </PrivateLayout>
   );
 }

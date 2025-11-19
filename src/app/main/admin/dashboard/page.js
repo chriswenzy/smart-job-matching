@@ -42,9 +42,9 @@ export default function AdminDashboard() {
       const statsData = await statsResponse.json();
       setStats(statsData);
 
-      const jobsResponse = await fetch("/api/admin/recent-jobs", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      // const jobsResponse = await fetch("/api/admin/recent-jobs", {
+      //   headers: { Authorization: `Bearer ${token}` },
+      // });
       const jobsData = await jobsResponse.json();
       setRecentJobs(jobsData);
 

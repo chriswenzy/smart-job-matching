@@ -19,6 +19,7 @@ import {
 } from "react-icons/fa";
 import Layout from "@/components/Layout/Layout";
 import { useAuth } from "@/components/AuthContext/AuthContext";
+import PrivateLayout from "@/components/Layout/PrivateLayout";
 
 export default function StudentDashboard() {
   // const { user } = useAuth();
@@ -135,7 +136,7 @@ export default function StudentDashboard() {
   }
 
   return (
-    <Layout>
+    <PrivateLayout>
       <Container className="py-4">
         {/* Welcome Section */}
         <Row className="mb-4">
@@ -434,6 +435,6 @@ export default function StudentDashboard() {
           </Col>
         </Row>
       </Container>
-    </Layout>
+    </PrivateLayout>
   );
 }

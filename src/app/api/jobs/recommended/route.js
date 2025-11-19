@@ -1,6 +1,4 @@
-// app/api/student/jobs/recommended/route.js
 import { verifyToken } from "@/lib/auth/auth";
-import { prisma } from "@/lib/prisma/prisma";
 import { calculateStudentJobMatches } from "@/utils/matchingAlgorithm";
 
 export async function GET(req) {

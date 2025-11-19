@@ -1,7 +1,8 @@
-// pages/admin/analytics.js
+"use client";
+
+import AdminLayout from "@/components/Layout/AdminLayout";
 import { useState, useEffect } from "react";
 import { Container, Row, Col, Card, Table, Form } from "react-bootstrap";
-import AdminLayout from "../../../components/AdminLayout";
 import { FaUsers, FaBriefcase, FaFileAlt, FaChartLine } from "react-icons/fa";
 
 export default function AdminAnalytics() {

@@ -1,4 +1,6 @@
-// pages/admin/applications.js
+"use client";
+
+import AdminLayout from "@/components/Layout/AdminLayout";
 import { useState, useEffect } from "react";
 import {
   Container,
@@ -12,7 +14,6 @@ import {
   InputGroup,
   Modal,
 } from "react-bootstrap";
-import AdminLayout from "../../../components/AdminLayout";
 import { FaSearch, FaEye, FaCheck, FaTimes, FaDownload } from "react-icons/fa";
 
 export default function AdminApplications() {
