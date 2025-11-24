@@ -1,4 +1,4 @@
-import { hashPassword } from "@/lib/auth/auth";
+import { hashPassword } from "../src/lib/auth/auth.js";
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
@@ -16,7 +16,7 @@ async function main() {
       passwordHash: adminPassword,
       userType: "ADMIN",
       fullName: "System Administrator",
-      emailVerified: true,
+      // emailVerified: true,
     },
   });
 

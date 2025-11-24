@@ -31,6 +31,7 @@ export default function StudentDashboard() {
   const [stats, setStats] = useState({});
   const [loading, setLoading] = useState(true);
 
+  console.log("jobs", jobs);
   useEffect(() => {
     fetchStudentData();
   }, []);
@@ -230,7 +231,7 @@ export default function StudentDashboard() {
                 <small>{jobs.length} matches found</small>
               </Card.Header>
               <Card.Body>
-                {jobs.length === 0 ? (
+                {jobs?.jobs.length === 0 ? (
                   <Alert variant="info">
                     <h6>No job matches found yet</h6>
                     <p className="mb-2">This could be because:</p>
@@ -250,7 +251,7 @@ export default function StudentDashboard() {
                   </Alert>
                 ) : (
                   <div className="job-list">
-                    {jobs.slice(0, 5).map((job) => (
+                    {jobs.jobs?.slice(0, 5).map((job) => (
                       <div
                         key={job.id}
                         className="job-item border-bottom pb-3 mb-3"

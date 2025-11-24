@@ -30,10 +30,6 @@ export default function Jobs() {
   const [itemsPerPage] = useState(9);
 
   useEffect(() => {
-    fetchJobs();
-  }, []);
-
-  useEffect(() => {
     filterJobs();
   }, [jobs, searchTerm, locationFilter, jobTypeFilter]);
 
@@ -93,6 +89,10 @@ export default function Jobs() {
     };
     return variants[jobType] || "secondary";
   };
+
+  useEffect(() => {
+    fetchJobs();
+  }, []);
 
   return (
     <Layout>

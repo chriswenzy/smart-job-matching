@@ -10,9 +10,13 @@ export async function GET(req) {
       },
       include: {
         employer: {
-          select: {
-            companyName: true,
-            email: true,
+          include: {
+            employerProfile: {
+              select: {
+                companyName: true,
+                // industry: true,
+              },
+            },
           },
         },
         _count: {

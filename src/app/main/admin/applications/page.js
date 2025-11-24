@@ -1,6 +1,7 @@
 "use client";
 
 import AdminLayout from "@/components/Layout/AdminLayout";
+import PrivateLayout from "@/components/Layout/PrivateLayout";
 import { useState, useEffect } from "react";
 import {
   Container,
@@ -121,7 +122,7 @@ export default function AdminApplications() {
   }
 
   return (
-    <AdminLayout>
+    <PrivateLayout>
       <Container fluid className="p-4">
         <Row className="mb-4">
           <Col>
@@ -209,7 +210,7 @@ export default function AdminApplications() {
                           </small>
                         </div>
                       </td>
-                      <td>{app.job.employer.companyName}</td>
+                      <td>{app.job.employer.employerProfile?.companyName}</td>
                       <td>
                         <Badge
                           bg={
@@ -435,6 +436,6 @@ export default function AdminApplications() {
           </Modal.Footer>
         </Modal>
       </Container>
-    </AdminLayout>
+    </PrivateLayout>
   );
 }

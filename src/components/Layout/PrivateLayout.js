@@ -48,7 +48,7 @@ export default function PrivateLayout({ children }) {
       href: "/main/admin/jobs",
       icon: FaBriefcase,
       label: "Jobs",
-      badge: "12",
+      // badge: "12",
     },
     {
       href: "/main/admin/applications",
@@ -56,12 +56,12 @@ export default function PrivateLayout({ children }) {
       label: "Applications",
       badge: null,
     },
-    {
-      href: "/main/admin/analytics",
-      icon: FaChartBar,
-      label: "Analytics",
-      badge: null,
-    },
+    // {
+    //   href: "/main/admin/analytics",
+    //   icon: FaChartBar,
+    //   label: "Analytics",
+    //   badge: null,
+    // },
     {
       href: "/main/admin/settings",
       icon: FaCog,
@@ -84,12 +84,12 @@ export default function PrivateLayout({ children }) {
       label: "Browse Jobs",
       badge: null,
     },
-    {
-      href: "/main/student/recommended-jobs",
-      icon: FaBriefcase,
-      label: "Recommended Jobs",
-      badge: "5",
-    },
+    // {
+    //   href: "/main/student/recommended-jobs",
+    //   icon: FaBriefcase,
+    //   label: "Recommended Jobs",
+    //   badge: "5",
+    // },
     {
       href: "/main/student/applications",
       icon: FaFileAlt,
@@ -102,12 +102,12 @@ export default function PrivateLayout({ children }) {
       label: "My Profile",
       badge: null,
     },
-    {
-      href: "/main/student/cv",
-      icon: FaFileAlt,
-      label: "CV Manager",
-      badge: null,
-    },
+    // {
+    //   href: "/main/student/cv",
+    //   icon: FaFileAlt,
+    //   label: "CV Manager",
+    //   badge: null,
+    // },
   ];
 
   // Employer Navigation Items
@@ -134,23 +134,21 @@ export default function PrivateLayout({ children }) {
       href: "/main/employer/applications",
       icon: FaFileAlt,
       label: "Applications",
-      badge: "8",
-    },
-    {
-      href: "/main/employer/profile",
-      icon: FaBuilding,
-      label: "Company Profile",
       badge: null,
     },
-    {
-      href: "/main/employer/analytics",
-      icon: FaChartBar,
-      label: "Analytics",
-      badge: null,
-    },
+    // {
+    //   href: "/main/employer/profile",
+    //   icon: FaBuilding,
+    //   label: "Company Profile",
+    //   badge: null,
+    // },
+    // {
+    //   href: "/main/employer/analytics",
+    //   icon: FaChartBar,
+    //   label: "Analytics",
+    //   badge: null,
+    // },
   ];
-
-  console.log("user login", user);
 
   // Get navigation items based on user type
   const getNavItems = () => {

@@ -83,8 +83,12 @@ export async function POST(req) {
         job: {
           include: {
             employer: {
-              select: {
-                companyName: true,
+              include: {
+                employerProfile: {
+                  select: {
+                    companyName: true,
+                  },
+                },
               },
             },
           },

@@ -18,6 +18,7 @@ import {
   FaEye,
 } from "react-icons/fa";
 import Layout from "@/components/Layout/Layout";
+import PrivateLayout from "@/components/Layout/PrivateLayout";
 
 export default function EmployerDashboard() {
   // const { user } = useAuth();
@@ -75,7 +76,7 @@ export default function EmployerDashboard() {
   }
 
   return (
-    <Layout>
+    <PrivateLayout>
       <Container className="py-4">
         {/* Welcome Section */}
         <Row className="mb-4">
@@ -376,6 +377,6 @@ export default function EmployerDashboard() {
           </Col>
         </Row>
       </Container>
-    </Layout>
+    </PrivateLayout>
   );
 }

@@ -9,48 +9,58 @@ import {
   FaArrowRight,
 } from "react-icons/fa";
 import Layout from "@/components/Layout/Layout";
+import Image from "next/image";
+import homeImg from "../assets/images/home-img.jpg";
 
 export default function Home() {
   return (
     <Layout>
       {/* Hero Section */}
-      <section className="bg-primary text-white py-5">
+      <section className="hero-section py-5">
         <Container>
-          <Row className="align-items-center min-vh-50">
-            <Col lg={6}>
-              <h1 className="display-4 fw-bold mb-4">
-                Smart Job Matching for Nigerian Graduates
-              </h1>
-              <p className="lead mb-4">
-                AI-powered platform connecting talented graduates with the right
-                career opportunities. Better matches, faster hiring.
-              </p>
-              <div className="d-flex flex-column flex-sm-row gap-3">
-                <Button
-                  as={Link}
-                  href="/student/register"
-                  variant="light"
-                  size="lg"
-                >
-                  Find Jobs
-                </Button>
-                <Button
-                  as={Link}
-                  href="/employer/register"
-                  variant="outline-light"
-                  size="lg"
-                >
-                  Hire Talent
-                </Button>
+          <Row className="align-items-center min-vh-60">
+            <Col lg={6} className="mb-5 mb-lg-0">
+              <div className="hero-text-wrapper">
+                <h1 className="hero-title mb-4">
+                  Smart Job Matching for Nigerian Graduates
+                </h1>
+
+                <p className="hero-subtitle mb-4">
+                  AI-powered platform connecting talented graduates with the
+                  right career opportunities. Better matches, faster hiring.
+                </p>
+
+                <div className="d-flex flex-column flex-sm-row gap-3">
+                  <Button
+                    as={Link}
+                    href="/student/register"
+                    className="hero-btn-primary"
+                    size="lg"
+                  >
+                    Find Jobs
+                  </Button>
+
+                  <Button
+                    as={Link}
+                    href="/employer/register"
+                    className="hero-btn-secondary"
+                    size="lg"
+                  >
+                    Hire Talent
+                  </Button>
+                </div>
               </div>
             </Col>
+
             <Col lg={6}>
-              <div className="text-center">
-                <img
-                  src="/hero-image.svg"
+              <div className="hero-image-wrapper text-center">
+                <Image
+                  width={420}
+                  height={420}
+                  src={homeImg}
                   alt="Job Matching"
-                  className="img-fluid"
-                  style={{ maxHeight: "400px" }}
+                  className="hero-image img-fluid"
+                  priority
                 />
               </div>
             </Col>

@@ -1,3 +1,4 @@
+"use client";
 import { useState, useEffect } from "react";
 import {
   Container,
@@ -11,9 +12,10 @@ import {
   Pagination,
 } from "react-bootstrap";
 import Link from "next/link";
-import Layout from "../../components/Layout";
-import { useAuth } from "../../context/AuthContext";
 import { FaPlus, FaEye, FaEdit, FaTrash, FaSearch } from "react-icons/fa";
+import PrivateLayout from "@/components/Layout/PrivateLayout";
+import { useAuth } from "@/components/AuthContext/AuthContext";
+import { useRouter } from "next/navigation";
 
 export default function EmployerJobs() {
   const { user } = useAuth();
@@ -23,14 +25,7 @@ export default function EmployerJobs() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
-
-  useEffect(() => {
-    fetchJobs();
-  }, []);
-
-  useEffect(() => {
-    filterJobs();
-  }, [jobs, searchTerm, statusFilter]);
+  const router = useRouter();
 
   const fetchJobs = async () => {
     try {
@@ -106,16 +101,29 @@ export default function EmployerJobs() {
     }
   };
 
+  const handleEdit = (job) => {
+    console.log("clicked job", job);
+
+    router.push(`/main/employer/jobs/${job.id}/edit`);
+  };
+
   // Pagination
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentJobs = filteredJobs.slice(indexOfFirstItem, indexOfLastItem);
+  const currentJobs = filteredJobs?.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(filteredJobs.length / itemsPerPage);
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
+  useEffect(() => {
+    filterJobs();
+  }, [jobs, searchTerm, statusFilter]);
+
+  useEffect(() => {
+    fetchJobs();
+  }, []);
   return (
-    <Layout>
+    <PrivateLayout>
       <Container className="py-4">
         <Row className="mb-4">
           <Col>
@@ -123,7 +131,7 @@ export default function EmployerJobs() {
             <p className="text-muted">View and manage your job postings</p>
           </Col>
           <Col xs="auto">
-            <Button as={Link} href="/employer/jobs/new" variant="primary">
+            <Button as={Link} href="/main/employer/jobs/new" variant="primary">
               <FaPlus className="me-2" />
               Post New Job
             </Button>
@@ -217,7 +225,11 @@ export default function EmployerJobs() {
                           <Button variant="outline-primary" size="sm">
                             <FaEye />
                           </Button>
-                          <Button variant="outline-warning" size="sm">
+                          <Button
+                            variant="outline-warning"
+                            size="sm"
+                            onClick={() => handleEdit(job)}
+                          >
                             <FaEdit />
                           </Button>
                           <Button
@@ -251,7 +263,11 @@ export default function EmployerJobs() {
             {currentJobs.length === 0 && (
               <div className="text-center py-5">
                 <p className="text-muted">No jobs found</p>
-                <Button as={Link} href="/employer/jobs/new" variant="primary">
+                <Button
+                  as={Link}
+                  href="/main/employer/jobs/new"
+                  variant="primary"
+                >
                   Post Your First Job
                 </Button>
               </div>
@@ -288,6 +304,6 @@ export default function EmployerJobs() {
           )}
         </Card>
       </Container>
-    </Layout>
+    </PrivateLayout>
   );
 }

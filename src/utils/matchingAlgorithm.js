@@ -5,19 +5,24 @@ const { TfIdf } = natural;
 
 export async function calculateStudentJobMatches(studentId) {
   try {
-    // Get student profile with parsed CV data
+    // Get student profile with skills (as scalar field)
     const student = await prisma.user.findUnique({
       where: { id: studentId },
       include: {
-        studentProfile: true,
+        studentProfile: true, // Remove the skills include
       },
     });
 
     if (!student || !student.studentProfile) {
-      return [];
+      throw new Error("Student profile not found");
     }
 
-    // Get all approved jobs
+    // Parse skills from the scalar field
+    const studentSkills = student.studentProfile.skills || [];
+    // If skills is a JSON string, you might need to parse it:
+    // const studentSkills = JSON.parse(student.studentProfile.skills || '[]');
+
+    // Get active, approved jobs
     const jobs = await prisma.job.findMany({
       where: {
         isApproved: true,
@@ -25,36 +30,76 @@ export async function calculateStudentJobMatches(studentId) {
       },
       include: {
         employer: {
+          include: {
+            employerProfile: {
+              select: {
+                companyName: true,
+                industry: true,
+                companySize: true,
+              },
+            },
+          },
+        },
+        _count: {
           select: {
-            companyName: true,
+            applications: true,
           },
         },
       },
     });
 
-    const matches = [];
+    // Calculate matches based on skills and profile
+    const matches = jobs.map((job) => {
+      let score = 0;
 
-    // Calculate match score for each job
-    for (const job of jobs) {
-      const matchScore = await calculateMatchScore(student, job);
+      // Basic matching logic
+      if (studentSkills.length > 0 && job.requirements) {
+        const normalizedStudentSkills = studentSkills.map((s) =>
+          s.toLowerCase().trim()
+        );
 
-      if (matchScore > 40) {
-        // Only show matches above threshold
-        matches.push({
-          ...job,
-          company_name: job.employer.companyName,
-          match_score: matchScore,
-        });
+        // Handle requirements - could be JSON, string, or array
+        let jobRequirements = [];
+        if (typeof job.requirements === "string") {
+          try {
+            jobRequirements = JSON.parse(job.requirements).requirements || [];
+          } catch {
+            // If it's not JSON, treat as raw text
+            jobRequirements = job.requirements.split(",").map((r) => r.trim());
+          }
+        } else if (job.requirements.requirements) {
+          jobRequirements = job.requirements.requirements;
+        } else if (Array.isArray(job.requirements)) {
+          jobRequirements = job.requirements;
+        }
+
+        // Calculate skill match
+        const matchedSkills = jobRequirements.filter((req) =>
+          normalizedStudentSkills.some(
+            (skill) =>
+              req.toLowerCase().includes(skill) ||
+              skill.includes(req.toLowerCase())
+          )
+        );
+
+        score =
+          (matchedSkills.length / Math.max(jobRequirements.length, 1)) * 100;
       }
-    }
 
-    // Sort by match score descending
-    matches.sort((a, b) => b.match_score - a.match_score);
+      // Add some randomness for demo (remove in production)
+      score = Math.min(score + Math.random() * 20, 95);
 
-    return matches;
+      return {
+        job,
+        matchScore: Math.round(score),
+      };
+    });
+
+    // Sort by match score (highest first)
+    return matches.sort((a, b) => b.matchScore - a.matchScore);
   } catch (error) {
-    console.error("Error calculating job matches:", error);
-    return [];
+    console.error("Error in matching algorithm:", error);
+    throw error;
   }
 }
 

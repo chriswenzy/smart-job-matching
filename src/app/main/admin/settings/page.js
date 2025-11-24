@@ -1,6 +1,7 @@
 "use client";
 
 import AdminLayout from "@/components/Layout/AdminLayout";
+import PrivateLayout from "@/components/Layout/PrivateLayout";
 import { useState } from "react";
 import {
   Container,
@@ -63,7 +64,7 @@ export default function AdminSettings() {
   };
 
   return (
-    <AdminLayout>
+    <PrivateLayout>
       <Container fluid className="p-4">
         <Row className="mb-4">
           <Col>
@@ -350,6 +351,6 @@ export default function AdminSettings() {
           </div>
         </Form>
       </Container>
-    </AdminLayout>
+    </PrivateLayout>
   );
 }

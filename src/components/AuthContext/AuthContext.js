@@ -31,6 +31,8 @@ export function AuthProvider({ children }) {
           localStorage.removeItem("token");
           setUser(null);
         }
+      } else {
+        setUser(null);
       }
     } catch (error) {
       console.error("Auth check failed:", error);
@@ -43,6 +45,7 @@ export function AuthProvider({ children }) {
 
   const login = async (email, password) => {
     try {
+      setLoading(true); // Start loading
       const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: {
@@ -54,9 +57,9 @@ export function AuthProvider({ children }) {
       if (response.ok) {
         const { token, user } = await response.json();
         localStorage.setItem("token", token);
-        setUser(user);
+        setUser(user); // This should trigger re-render
 
-        // Redirect based on user type - fixed path structure
+        // Redirect based on user type
         if (user.userType === "STUDENT") {
           router.push("/main/student/dashboard");
         } else if (user.userType === "EMPLOYER") {
@@ -73,6 +76,8 @@ export function AuthProvider({ children }) {
     } catch (error) {
       console.error("Login error:", error);
       return { success: false, error: "Login failed. Please try again." };
+    } finally {
+      setLoading(false); // End loading
     }
   };
 
@@ -82,13 +87,18 @@ export function AuthProvider({ children }) {
     router.push("/");
   };
 
-  // Add setUser to the context value so it can be used in components
+  // Force refresh user data
+  const refreshUser = async () => {
+    await checkUser();
+  };
+
   const value = {
     user,
     setUser,
     login,
     logout,
     loading,
+    refreshUser,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

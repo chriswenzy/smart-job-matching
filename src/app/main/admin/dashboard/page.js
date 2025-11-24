@@ -19,6 +19,7 @@ import {
   FaTimes,
 } from "react-icons/fa";
 import AdminLayout from "@/components/Layout/AdminLayout";
+import PrivateLayout from "@/components/Layout/PrivateLayout";
 
 export default function AdminDashboard() {
   // const { user } = useAuth();
@@ -79,7 +80,7 @@ export default function AdminDashboard() {
   };
 
   return (
-    <AdminLayout>
+    <PrivateLayout>
       <Container fluid className="p-4">
         {/* Stats Cards */}
         <Row className="mb-4">
@@ -291,6 +292,6 @@ export default function AdminDashboard() {
           </Col>
         </Row>
       </Container>
-    </AdminLayout>
+    </PrivateLayout>
   );
 }

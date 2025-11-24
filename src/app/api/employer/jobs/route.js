@@ -31,6 +31,33 @@ export async function GET(req) {
       },
     });
 
+    // const jobs = await prisma.job.findMany({
+    //   where: {
+    //     isApproved: true,
+    //     isActive: true,
+    //   },
+    //   include: {
+    //     employer: {
+    //       include: {
+    //         employerProfile: {
+    //           select: {
+    //             companyName: true,
+    //             industry: true,
+    //           },
+    //         },
+    //       },
+    //     },
+    //     _count: {
+    //       select: {
+    //         applications: true,
+    //       },
+    //     },
+    //   },
+    //   orderBy: {
+    //     createdAt: "desc",
+    //   },
+    // });
+
     return Response.json(jobs);
   } catch (error) {
     console.error("Error in employer jobs API:", error);

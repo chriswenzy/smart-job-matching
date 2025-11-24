@@ -150,20 +150,27 @@ export default function StudentRegisterCV() {
                     const uploadInterval = simulateUpload();
 
                     try {
-                      // Read file as text (simplified - in real app, you'd send file to server)
-                      const cvText = await readFileAsText(cvFile);
+                      // Use FormData for file upload
+                      const formData = new FormData();
+
+                      // Append all form values
+                      Object.keys(values).forEach((key) => {
+                        if (key !== "cv" && values[key]) {
+                          formData.append(key, values[key]);
+                        }
+                      });
+
+                      // Append the CV file
+                      if (cvFile) {
+                        formData.append("cv", cvFile);
+                      }
 
                       const response = await fetch(
-                        "/api/auth/student/register-cv",
+                        "/api/auth/register-with-cv",
                         {
                           method: "POST",
-                          headers: {
-                            "Content-Type": "application/json",
-                          },
-                          body: JSON.stringify({
-                            ...values,
-                            cvText: cvText.substring(0, 10000), // Limit text length
-                          }),
+                          // REMOVE the Authorization header - no token needed for registration
+                          body: formData,
                         }
                       );
 
@@ -173,11 +180,11 @@ export default function StudentRegisterCV() {
                       if (response.ok) {
                         const data = await response.json();
 
-                        // Store token and redirect
+                        // Store the token
                         localStorage.setItem("token", data.token);
 
                         setTimeout(() => {
-                          router.push("/student/dashboard?welcome=true");
+                          router.push("/main/student/dashboard?welcome=true");
                         }, 1000);
                       } else {
                         const errorData = await response.json();
@@ -188,6 +195,7 @@ export default function StudentRegisterCV() {
                       clearInterval(uploadInterval);
                       setUploadProgress(0);
                       setError("Registration failed. Please try again.");
+                      console.error("Upload error:", error);
                     }
 
                     setIsUploading(false);

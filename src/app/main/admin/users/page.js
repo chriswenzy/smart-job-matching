@@ -1,5 +1,6 @@
 "use client";
 import AdminLayout from "@/components/Layout/AdminLayout";
+import PrivateLayout from "@/components/Layout/PrivateLayout";
 import { useState, useEffect } from "react";
 import {
   Container,
@@ -13,7 +14,15 @@ import {
   InputGroup,
   Modal,
 } from "react-bootstrap";
-import { FaSearch } from "react-icons/fa";
+import {
+  FaEdit,
+  FaEye,
+  FaSearch,
+  FaTrash,
+  FaUser,
+  FaUserTie,
+} from "react-icons/fa";
+import { FaShield } from "react-icons/fa6";
 
 export default function AdminUsers() {
   const [users, setUsers] = useState([]);
@@ -112,7 +121,7 @@ export default function AdminUsers() {
 
   if (loading) {
     return (
-      <AdminLayout>
+      <PrivateLayout>
         <Container fluid className="p-4">
           <div className="text-center">
             <div className="spinner-border" role="status">
@@ -120,12 +129,12 @@ export default function AdminUsers() {
             </div>
           </div>
         </Container>
-      </AdminLayout>
+      </PrivateLayout>
     );
   }
 
   return (
-    <AdminLayout>
+    <PrivateLayout>
       <Container fluid className="p-4">
         <Row className="mb-4">
           <Col>
@@ -190,7 +199,7 @@ export default function AdminUsers() {
                   </tr>
                 </thead>
                 <tbody>
-                  {/* {filteredUsers.map((user) => (
+                  {filteredUsers.map((user) => (
                     <tr key={user.id}>
                       <td>
                         <div className="d-flex align-items-center">
@@ -237,7 +246,7 @@ export default function AdminUsers() {
                         </div>
                       </td>
                     </tr>
-                  ))} */}
+                  ))}
                 </tbody>
               </Table>
             </div>
@@ -338,6 +347,6 @@ export default function AdminUsers() {
           </Modal.Footer>
         </Modal>
       </Container>
-    </AdminLayout>
+    </PrivateLayout>
   );
 }

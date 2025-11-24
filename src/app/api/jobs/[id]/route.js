@@ -13,16 +13,42 @@ export async function GET(req, { params }) {
       );
     }
 
+    // const job = await prisma.job.findUnique({
+    //   where: {
+    //     id: parseInt(id),
+    //   },
+    //   include: {
+    //     employer: {
+    //       select: {
+    //         companyName: true,
+    //         email: true,
+    //         employerProfile: true,
+    //       },
+    //     },
+    //     _count: {
+    //       select: {
+    //         applications: true,
+    //       },
+    //     },
+    //   },
+    // });
+
     const job = await prisma.job.findUnique({
       where: {
         id: parseInt(id),
       },
       include: {
         employer: {
-          select: {
-            companyName: true,
-            email: true,
-            employerProfile: true,
+          include: {
+            employerProfile: {
+              select: {
+                companyName: true,
+                industry: true,
+                companySize: true,
+                website: true,
+                bio: true,
+              },
+            },
           },
         },
         _count: {

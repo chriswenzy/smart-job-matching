@@ -206,7 +206,7 @@ export default function StudentApplications() {
                           </small>
                         </div>
                       </td>
-                      <td>{app.job.employer.companyName}</td>
+                      <td>{app.job.employer.employerProfile?.companyName}</td>
                       <td>
                         <Badge
                           bg={

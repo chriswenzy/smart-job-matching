@@ -20,10 +20,10 @@ export default function Login() {
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
-  const [user, setUser] = useState("");
-  // const { setUser } = useAuth();
+  //   const [user, setUser] = useState("");
+  const { setUser, Login } = useAuth();
 
-  const HandleLogin = async (email, password) => {
+  const login = async (email, password) => {
     try {
       const response = await fetch("/api/auth/login", {
         method: "POST",
@@ -35,8 +35,6 @@ export default function Login() {
 
       if (response.ok) {
         const { token, user } = await response.json();
-        console.log("login user", user);
-        console.log("login token", token);
 
         // Store token and update auth context
         localStorage.setItem("token", token);
@@ -99,10 +97,7 @@ export default function Login() {
                   }}
                   onSubmit={async (values, { setSubmitting }) => {
                     setError("");
-                    const result = await HandleLogin(
-                      values.email,
-                      values.password
-                    );
+                    const result = await login(values.email, values.password);
                     if (!result.success) {
                       setError(result.error);
                     }

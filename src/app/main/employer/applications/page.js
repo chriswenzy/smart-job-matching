@@ -1,3 +1,4 @@
+"use client";
 import { useState, useEffect } from "react";
 import {
   Container,
@@ -10,9 +11,9 @@ import {
   Form,
   Modal,
 } from "react-bootstrap";
-import Layout from "../../components/Layout";
-import { useAuth } from "../../context/AuthContext";
 import { FaSearch, FaEye, FaCheck, FaTimes, FaDownload } from "react-icons/fa";
+import PrivateLayout from "@/components/Layout/PrivateLayout";
+import { useAuth } from "@/components/AuthContext/AuthContext";
 
 export default function EmployerApplications() {
   const { user } = useAuth();
@@ -24,14 +25,6 @@ export default function EmployerApplications() {
   const [jobs, setJobs] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [selectedApplication, setSelectedApplication] = useState(null);
-
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  useEffect(() => {
-    filterApplications();
-  }, [applications, searchTerm, statusFilter, jobFilter]);
 
   const fetchData = async () => {
     try {
@@ -116,8 +109,16 @@ export default function EmployerApplications() {
     return variants[status] || "secondary";
   };
 
+  useEffect(() => {
+    filterApplications();
+  }, [applications, searchTerm, statusFilter, jobFilter]);
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
   return (
-    <Layout>
+    <PrivateLayout>
       <Container className="py-4">
         <Row className="mb-4">
           <Col>
@@ -455,6 +456,6 @@ export default function EmployerApplications() {
           </Modal.Footer>
         </Modal>
       </Container>
-    </Layout>
+    </PrivateLayout>
   );
 }

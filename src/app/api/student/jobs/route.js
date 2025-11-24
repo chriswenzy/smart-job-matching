@@ -14,218 +14,159 @@ export async function GET(req) {
       return Response.json({ message: "Access denied" }, { status: 403 });
     }
 
-    // Get query parameters for filtering and pagination
+    // Get query parameters
     const { searchParams } = new URL(req.url);
-    const search = searchParams.get("search");
-    const jobType = searchParams.get("jobType");
-    const location = searchParams.get("location");
-    const minSalary = searchParams.get("minSalary");
-    const maxSalary = searchParams.get("maxSalary");
-    const industry = searchParams.get("industry");
+    const search = searchParams.get("search") || "";
+    const jobType = searchParams.get("jobType") || "";
+    const location = searchParams.get("location") || "";
+    const industry = searchParams.get("industry") || "";
     const page = parseInt(searchParams.get("page") || "1");
-    const limit = parseInt(searchParams.get("limit") || "20");
+    const limit = parseInt(searchParams.get("limit") || "12");
     const skip = (page - 1) * limit;
 
-    // Build where clause - only show approved and active jobs
+    // Build base where clause - only approved and active jobs
     const where = {
       isApproved: true,
       isActive: true,
     };
 
-    // Add search functionality
+    // Add search filter
     if (search) {
       where.OR = [
-        {
-          title: {
-            contains: search,
-            mode: "insensitive",
-          },
-        },
-        {
-          description: {
-            contains: search,
-            mode: "insensitive",
-          },
-        },
+        { title: { contains: search, mode: "insensitive" } },
+        { description: { contains: search, mode: "insensitive" } },
         {
           employer: {
-            companyName: {
-              contains: search,
-              mode: "insensitive",
+            employerProfile: {
+              companyName: { contains: search, mode: "insensitive" },
             },
-          },
-        },
-        {
-          requirements: {
-            path: "$.**", // Search in JSON requirements field
-            string_contains: search,
           },
         },
       ];
     }
 
-    // Add filters
+    // Add job type filter
     if (jobType) {
       where.jobType = jobType;
     }
 
+    // Add location filter
     if (location) {
-      where.location = {
-        contains: location,
-        mode: "insensitive",
-      };
+      where.location = { contains: location, mode: "insensitive" };
     }
 
+    // Add industry filter
     if (industry) {
       where.employer = {
         employerProfile: {
-          industry: {
-            contains: industry,
-            mode: "insensitive",
-          },
+          industry: { contains: industry, mode: "insensitive" },
         },
       };
     }
 
-    // Salary range filtering
-    if (minSalary || maxSalary) {
-      where.AND = where.AND || [];
-
-      if (minSalary) {
-        where.AND.push({
-          OR: [
-            {
-              salaryRange: {
-                gte: minSalary,
-              },
-            },
-            {
-              salaryRange: null, // Include jobs without salary specified
-            },
-          ],
-        });
-      }
-
-      if (maxSalary) {
-        where.AND.push({
-          OR: [
-            {
-              salaryRange: {
-                lte: maxSalary,
-              },
-            },
-            {
-              salaryRange: null, // Include jobs without salary specified
-            },
-          ],
-        });
-      }
-    }
-
-    // Get student's existing applications to show application status
-    const existingApplications = await prisma.application.findMany({
-      where: {
-        studentId: decoded.userId,
-      },
-      select: {
-        jobId: true,
-        status: true,
-      },
+    // Get student's applications to show application status
+    const applications = await prisma.application.findMany({
+      where: { studentId: decoded.userId },
+      select: { jobId: true, status: true },
     });
 
     const applicationMap = new Map(
-      existingApplications.map((app) => [app.jobId, app.status])
+      applications.map((app) => [app.jobId, app.status])
     );
 
-    const [jobs, total, filterOptions] = await Promise.all([
-      // Get jobs with pagination
-      prisma.job.findMany({
-        where,
-        include: {
-          employer: {
-            select: {
-              companyName: true,
-              email: true,
-              location: true,
-              employerProfile: {
-                select: {
-                  industry: true,
-                  companySize: true,
-                  website: true,
-                },
+    // Get jobs with pagination
+    const jobs = await prisma.job.findMany({
+      where,
+      include: {
+        employer: {
+          include: {
+            employerProfile: {
+              select: {
+                companyName: true,
+                industry: true,
+                companySize: true,
+                website: true,
               },
             },
           },
-          _count: {
-            select: {
-              applications: true,
-            },
+        },
+        _count: {
+          select: {
+            applications: true,
           },
         },
-        orderBy: {
-          createdAt: "desc",
-        },
-        skip,
-        take: limit,
+      },
+      orderBy: { createdAt: "desc" },
+      skip,
+      take: limit,
+    });
+
+    // Get total count for pagination
+    const total = await prisma.job.count({ where });
+
+    // Get available filter options
+    const [jobTypes, locations, industries] = await Promise.all([
+      // Job types
+      prisma.job.findMany({
+        where: { isApproved: true, isActive: true },
+        distinct: ["jobType"],
+        select: { jobType: true },
       }),
-
-      // Get total count for pagination
-      prisma.job.count({ where }),
-
-      // Get filter options for frontend
-      Promise.all([
-        prisma.job.findMany({
-          where: {
-            isApproved: true,
-            isActive: true,
-          },
-          distinct: ["jobType"],
-          select: {
-            jobType: true,
-          },
-        }),
-        prisma.job.findMany({
-          where: {
-            isApproved: true,
-            isActive: true,
-            location: {
-              not: null,
-            },
-          },
-          distinct: ["location"],
-          select: {
-            location: true,
-          },
-          take: 50,
-        }),
-        prisma.employerProfile.findMany({
-          where: {
-            industry: {
-              not: null,
-            },
-          },
-          distinct: ["industry"],
-          select: {
-            industry: true,
-          },
-          take: 50,
-        }),
-      ]),
+      // Locations
+      prisma.job.findMany({
+        where: {
+          isApproved: true,
+          isActive: true,
+          location: { not: null },
+        },
+        distinct: ["location"],
+        select: { location: true },
+        take: 20,
+      }),
+      // Industries
+      prisma.employerProfile.findMany({
+        where: { industry: { not: null } },
+        distinct: ["industry"],
+        select: { industry: true },
+        take: 20,
+      }),
     ]);
 
-    // Add application status to each job
-    const jobsWithApplicationStatus = jobs.map((job) => ({
-      ...job,
+    // Format jobs with application status
+    const formattedJobs = jobs.map((job) => ({
+      id: job.id,
+      title: job.title,
+      description: job.description,
+      location: job.location,
+      jobType: job.jobType,
+      salaryRange: job.salaryRange,
+      requirements: job.requirements,
+      isActive: job.isActive,
+      isApproved: job.isApproved,
+      createdAt: job.createdAt,
+      updatedAt: job.updatedAt,
+      employer: {
+        id: job.employer.id,
+        email: job.employer.email,
+        fullName: job.employer.fullName,
+        companyName: job.employer.employerProfile?.companyName,
+        industry: job.employer.employerProfile?.industry,
+        companySize: job.employer.employerProfile?.companySize,
+        website: job.employer.employerProfile?.website,
+      },
+      _count: {
+        applications: job._count.applications,
+      },
       hasApplied: applicationMap.has(job.id),
-      applicationStatus: applicationMap.get(job.id) || null,
+      applicationStatus: applicationMap.get(job.id),
     }));
 
     return Response.json({
-      jobs: jobsWithApplicationStatus,
+      jobs: formattedJobs,
       filters: {
-        jobTypes: filterOptions[0].map((j) => j.jobType).filter(Boolean),
-        locations: filterOptions[1].map((l) => l.location).filter(Boolean),
-        industries: filterOptions[2].map((i) => i.industry).filter(Boolean),
+        jobTypes: jobTypes.map((j) => j.jobType).filter(Boolean),
+        locations: locations.map((l) => l.location).filter(Boolean),
+        industries: industries.map((i) => i.industry).filter(Boolean),
       },
       pagination: {
         page,
