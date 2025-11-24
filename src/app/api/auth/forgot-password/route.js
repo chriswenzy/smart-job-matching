@@ -1,7 +1,7 @@
 // app/api/auth/forgot-password/route.js
+import { sendEmail } from "@/lib/email/email";
 import { prisma } from "@/lib/prisma/prisma";
 import crypto from "crypto";
-import { sendEmail } from "@/lib/email";
 
 export async function POST(req) {
   try {
