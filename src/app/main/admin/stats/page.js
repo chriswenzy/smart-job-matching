@@ -1,6 +1,7 @@
 // pages/api/admin/stats.js
-import { verifyToken } from "../../../../lib/auth";
-import { prisma } from "../../../../lib/prisma";
+
+import { verifyToken } from "@/lib/auth/auth";
+import { prisma } from "@/lib/prisma/prisma";
 
 export default async function handler(req, res) {
   if (req.method !== "GET") {

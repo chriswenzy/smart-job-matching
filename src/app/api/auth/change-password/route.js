@@ -1,9 +1,5 @@
-import {
-  verifyToken,
-  verifyPassword,
-  hashPassword,
-} from "../../../../lib/auth";
-import { prisma } from "../../../../lib/prisma";
+import { hashPassword, verifyPassword, verifyToken } from "@/lib/auth/auth";
+import { prisma } from "@/lib/prisma/prisma";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
